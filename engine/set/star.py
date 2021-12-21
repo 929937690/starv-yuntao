@@ -560,16 +560,24 @@ class Star:
     # estimate ranges using clip method from Stanley Bak
     # it is slower than the for-loop method
     def estimateRanges(obj):
+        # changes here
         # return: lb: lower bound vector
         #         ub: upper bound vector
 
+        # ???
         pos_mat = np.where(obj.V > 0, obj.V, 0)
         neg_mat = np.where(obj.V < 0, obj.V, 0)
 
-        xmin1 = pos_mat * np.matrix(np.vstack((0, obj.predicate_lb)))
-        xmax1 = pos_mat * np.matrix(np.vstack((0, obj.predicate_ub)))
-        xmin2 = neg_mat * np.matrix(np.vstack((0, obj.predicate_ub)))
-        xmax2 = neg_mat * np.matrix(np.vstack((0, obj.predicate_lb)))
+        if obj.predicate_lb.size and obj.predicate_ub.size:
+            xmin1 = pos_mat * np.matrix(np.vstack((0, obj.predicate_lb)))
+            xmax1 = pos_mat * np.matrix(np.vstack((0, obj.predicate_ub)))
+            xmin2 = neg_mat * np.matrix(np.vstack((0, obj.predicate_ub)))
+            xmax2 = neg_mat * np.matrix(np.vstack((0, obj.predicate_lb)))
+        else:
+            xmin1 = pos_mat * np.zeros(pos_mat.shape[1])
+            xmax1 = pos_mat * np.zeros(pos_mat.shape[1])
+            xmin2 = neg_mat * np.zeros(pos_mat.shape[1])
+            xmax2 = neg_mat * np.zeros(pos_mat.shape[1])
 
         lb = obj.V[:, 0] + xmin1 + xmin2
         ub = obj.V[:, 0] + xmax1 + xmax2

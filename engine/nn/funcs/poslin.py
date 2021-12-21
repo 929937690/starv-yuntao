@@ -321,7 +321,8 @@ class PosLin:
                 map = np.argwhere(flatten_ub <= 0)
                 ub_map = np.array([])
                 for i in range(len(map)):
-                    index = map[i][1] * len(flatten_ub[0]) + map[0][i]
+                    #index = map[i][1] * len(flatten_ub[0]) + map[0][i]
+                    index = map[i][1]
                     ub_map = np.append(ub_map, index)
                 V = copy.deepcopy(I.V)
                 ### V[ub_map, :] = 0
@@ -342,13 +343,15 @@ class PosLin:
                 map = np.argwhere(flatten_lb < 0)
                 lb_map = np.array([])
                 for i in range(len(map)):
-                    index = map[i][1] * len(flatten_lb[0]) + map[0][i]
+                    #index = map[i][1] * len(flatten_lb[0]) + map[0][i]
+                    index = map[i][1]
                     lb_map = np.append(lb_map, index)
 
                 map = np.argwhere(flatten_ub > 0)
                 ub_map = np.array([])
                 for i in range(len(map)):
-                    index = map[i][1] * len(flatten_ub[0]) + map[0][i]
+                    #index = map[i][1] * len(flatten_ub[0]) + map[0][i]
+                    index = map[i][1]
                     ub_map = np.append(ub_map, index)
 
                 lu_map_float = np.intersect1d([lb_map], [ub_map])
@@ -514,7 +517,8 @@ class PosLin:
                 map = np.argwhere(flatten_ub <= 0)
                 ub_map = np.array([])
                 for i in range(len(map)):
-                    index = map[i][1] * len(flatten_ub[0]) + map[0][i]
+                    #index = map[i][1] * len(flatten_ub[0]) + map[0][i]
+                    index = map[i][1]
                     print(index)
                     ub_map = np.append(ub_map, index)
                 V = copy.deepcopy(I.V)
@@ -535,13 +539,15 @@ class PosLin:
                 map = np.argwhere(flatten_lb < 0)
                 lb_map = np.array([])
                 for i in range(len(map)):
-                    index = map[i][1] * len(flatten_lb[0]) + map[0][i]
+                    #index = map[i][1] * len(flatten_lb[0]) + map[0][i]
+                    index = map[i][1]
                     lb_map = np.append(lb_map, index)
 
                 map = np.argwhere(flatten_ub > 0)
                 ub_map = np.array([])
                 for i in range(len(map)):
-                    index = map[i][1] * len(flatten_ub[0]) + map[0][i]
+                    #index = map[i][1] * len(flatten_ub[0]) + map[0][i]
+                    index = map[i][1]
                     ub_map = np.append(ub_map, index)
 
                 lu_map_float = np.intersect1d([lb_map], [ub_map])
@@ -661,7 +667,8 @@ class PosLin:
     #             map = np.argwhere(flatten_ub <= 0)
     #             map1 = np.array([])
     #             for i in range(len(map)):
-    #                 index = map[i][1] * len(flatten_ub[0]) + map[0][i]
+    ##                 index = map[i][1] * len(flatten_ub[0]) + map[0][i]
+    #                 index = map[i][1]
     #                 map1 = np.append(map1, index)
     #
     #             if dis_opt == 'display':
@@ -670,13 +677,15 @@ class PosLin:
     #             map = np.argwhere(flatten_lb < 0)
     #             lb_map = np.array([])
     #             for i in range(len(map)):
-    #                 index = map[i][1] * len(flatten_lb[0]) + map[0][i]
+    ##                 index = map[i][1] * len(flatten_lb[0]) + map[0][i]
+    #                 index = map[i][1]
     #                 lb_map = np.append(lb_map, index)
     #
     #             map = np.argwhere(flatten_ub > 0)
     #             ub_map = np.array([])
     #             for i in range(len(map)):
-    #                 index = map[i][1] * len(flatten_ub[0]) + map[0][i]
+    ##                 index = map[i][1] * len(flatten_ub[0]) + map[0][i]
+    #                 index = map[i][1]
     #                 ub_map = np.append(ub_map, index)
     #
     #             map2 = np.intersect1d([lb_map], [ub_map])
@@ -689,7 +698,8 @@ class PosLin:
     #             map = np.argwhere(flatten_xmax <= 0)
     #             map3 = np.array([])
     #             for i in range(len(map)):
-    #                 index = map[i][1] * len(flatten_xmax[0]) + map[0][i]
+    ##                 index = map[i][1] * len(flatten_xmax[0]) + map[0][i]
+    #                 index = map[i][1]
     #                 map3 = np.append(map3, index)
     #
     #             if dis_opt == 'display':
@@ -714,7 +724,8 @@ class PosLin:
     #             map = np.argwhere(flatten_xmax > 0)
     #             map5 = np.array([])
     #             for i in range(len(map)):
-    #                 index = map[i][1] * len(flatten_xmax[0]) + map[0][i]
+    ##                 index = map[i][1] * len(flatten_xmax[0]) + map[0][i]
+    #                 index = map[i][1]
     #                 map5 = np.append(map5, index)
     #
     #             map6 = map2[map5[:]] # all indexes having ub > 0
@@ -725,7 +736,8 @@ class PosLin:
     #             map = np.argwhere(flatten_xmin < 0)
     #             map7 = np.array([])
     #             for i in range(len(map)):
-    #                 index = map[i][1] * len(flatten_xmin[0]) + map[0][i]
+    ##                 index = map[i][1] * len(flatten_xmin[0]) + map[0][i]
+    #                 index = map[i][1]
     #                 map7 = np.append(map7, index)
     #
     #             map8 = map6[map7[:]] # all indexes habing lb < 0 & ub > 0
