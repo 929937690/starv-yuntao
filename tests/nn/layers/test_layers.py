@@ -2,7 +2,7 @@
 import numpy as np
 
 from engine.nn.funcs.poslin import PosLin
-from engine.nn.layers.layer import Layer
+from engine.nn.layers.layer import Layers
 from engine.set.star import Star
 # random input set
 Ai = np.matrix('-0.540814703979925 -0.421878816995180;'
@@ -30,7 +30,7 @@ b = np.matrix('0.5;'
 V = np.matrix('0 0;'
               '1 0;'
               '0 1')
-L = Layer(W=W, b=b, f='poslin')
+L = Layers(W=W, b=b, f='poslin')
 #print(L.__repr__())
 # ----------------- end the test for Layer Construction function ---------
 
