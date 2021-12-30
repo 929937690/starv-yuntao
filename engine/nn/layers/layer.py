@@ -66,12 +66,14 @@ class Layers:
         if x.shape[0] != obj.W.shape[1] or x.shape[1] != 1:
             'error: invalid or inconsistent input vector'
         y1 = obj.W * x + obj.b
-
+        y1_len = y1.shape[0]
         if obj.f == 'poslin':
-            y = PosLin(y1)
+            for i in range(y1_len):
+                y1[i] = max(0, y1[i])
+
         # ...... other functions
         else: 'error: unknown or unsupported activation function'
-        return
+        return y1
 
     # Evaluate the value of the layer output with a set of vertices
     def sample(obj, V):

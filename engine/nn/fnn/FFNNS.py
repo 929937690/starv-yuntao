@@ -4,6 +4,7 @@ from engine.set.star import Star
 from engine.set.box import Box
 from engine.set.zono import Zono
 from engine.set.imagestar import ImageStar
+from engine.set.halfspace import HalfSpace
 
 import time
 
@@ -23,7 +24,8 @@ def toc(tempBool=True):
     # Prints the time difference yielded by generator instance TicToc
     tempTimeInterval = next(TicToc)
     if tempBool:
-        print("Elapsed time: %f seconds.\n" % tempTimeInterval)
+        #print("Elapsed time: %f seconds.\n" % tempTimeInterval)
+        return tempTimeInterval
 
 def tic():
     # Records a time in TicToc, marks the beginning of a time interval
@@ -37,7 +39,8 @@ class FFNNS:
     # date: 11/13/2021
 
     def __init__(obj,
-                 Layers = np.matrix([]), # An array of Layers, eg, Layers = [L1 L2 ... Ln]
+                 #Layers = np.matrix([]), # An array of Layers, eg, Layers = [L1 L2 ... Ln]
+                 Layers=[],  # An list of Layers, eg, Layers = [L1 L2 ... Ln]
                  nL = 0, # number of Layers
                  nN = 0, # number of Neurons
                  nI = 0, # number of Inputs
@@ -46,39 +49,44 @@ class FFNNS:
                  # properties for each set computation
 
                  reachMethod = 'exact-star', # reachable set computation scheme, default - 'star'
-                 reachOption = np.matrix([]), # parallel option, default - non-parallel computing
+                 #reachOption = np.matrix([]), # parallel option, default - non-parallel computing
+                 reachOption = '',  # parallel option, default - non-parallel computing
                  relaxFactor = 0, # use only for approximate star method, 0 mean no relaxation
                  numCores = 1, # number of cores (workers) using in computation
                  inputSet = np.matrix([]), # input set
                  reachSet = np.matrix([]), # reachable set of each layers
                  outputSet = np.matrix([]), # output reach set
                  reachTime = np.matrix([]), # computation time for each layers
+                 numReachSet = np.matrix([]), # number of reach sets over layers
                  totalReachTime = 0, # total computation time
-                 numSample = 0, # default number of samples using to falsify a property
+                 numSamples = 0, # default number of samples using to falsify a property
                  unsafeRegion = np.matrix([]), # unsafe region of the network
                  getCounterExs = 0, # default, not getting counterexamples
 
                  Operations = np.matrix([]), # flatten a network into a sequence of operations
 
-                 dis_opt = np.matrix([]), # display option
+                 dis_opt = '', # display option
                  lp_solver = 'gurobi', # lp solver option, should be 'gurobi'
-                 Name = 'net' # default is 'net'
+                 Name='net'  # default is 'net'
                  ):
 
-        assert isinstance(reachOption, np.ndarray), 'error: reachOption matrix is not an ndarray'
-        assert isinstance(Layers, np.ndarray), 'error: Layers matrix is not an ndarray'
+        #assert isinstance(reachOption, np.ndarray), 'error: reachOption matrix is not an ndarray'
+        #assert isinstance(Layers, np.ndarray), 'error: Layers matrix is not an ndarray'
+        assert isinstance(Layers, list), 'error: Layers matrix is not a list'
         assert isinstance(inputSet, np.ndarray), 'error: inputSet matrix is not an ndarray'
         assert isinstance(reachSet, np.ndarray), 'error: reachSet vector is not an ndarray'
         assert isinstance(outputSet, np.ndarray), ' error: outputSet is not an ndarray'
         assert isinstance(reachTime, np.ndarray), 'error: reachTime is not an ndarray'
+        assert isinstance(numReachSet, np.ndarray), 'error: numReachSet is not an ndarray'
         assert isinstance(unsafeRegion, np.ndarray), 'error: unsafeRegion matrix is not an ndarray'
         assert isinstance(Operations, np.ndarray), 'error: Operations matrix is not an ndarray'
-        assert isinstance(dis_opt, np.ndarray), 'error: dis_opt matrix is not an ndarray'
+        #assert isinstance(dis_opt, np.ndarray), 'error: dis_opt matrix is not an ndarray'
 
-        if Layers.size:
+        if Layers:
             if Name:
                 obj.Name = Name
-            nL = np.size(Layers, 1) # number of Layer
+            #nL = np.size(Layers, 1) # number of Layer
+            nl = len(Layers) # number of Layer
             for i in range(nL):
                 L = Layers[i]
                 if not isinstance(L, Layers): 'error: Element of Layers array is not a Layer object'
@@ -89,17 +97,42 @@ class FFNNS:
                     'error: Inconsistent dimensions between Layer and Layer'
 
             obj.Layers = Layers
-            obj.nL = nL # number of layers
-            obj.nI = np.size(Layers[i].W, 2) # number of inputs
-            obj.nO = np.size(Layers[nL].W, 1) # number of outputs
+            obj.nL = nl # number of layers
+            obj.nI = Layers[0].W.shape[1] # number of inputs
+            obj.nO = Layers[nL].W.shape[0] # number of outputs
 
             nN = 0
             for i in range(nL):
                 nN = nN + Layers[i].N
             obj.nN = nN # number of neurons
 
+            obj.Name = Name
+            obj.reachMethod = reachMethod
+            obj.reachOption = reachOption
+            obj.relaxFactor = relaxFactor
+            obj.numCores = numCores
+            obj.inputSet = inputSet
+            obj.reachSet = reachSet
+            obj.outputSet = outputSet
+            obj.reachTime = reachTime
+            obj.numReachSet = numReachSet
+            obj.totalReachTime = totalReachTime
+            obj.numSamples = numSamples
+            obj.unsafeRegion = unsafeRegion
+            obj.getCounterExs = getCounterExs
+            obj.Operations = Operations
+            obj.dis_opt = dis_opt
+            obj.lp_solver = lp_solver
             return
         raise Exception('error: failed to create FFNNS')
+
+    def __repr__(obj):
+        return "class: %s \nName: %s \nLayers: %s \nnL: %s \nnN: %s \nnI: %s \nnO: %s \nreachMethod: %s \nreachOption: %s \nrelaxFactor: %s" \
+               "\nnumCores: %s \ninputSet: %s \nreachSet: %s \noutputSet: %s \nreachTime: %s \nnumReachSet: %s \nnumSamples: %s " \
+               "\nunsafeRegion: %s \ngetCounterExs: %s \nOperations: %s \ndis_opt: %s \nlp_solver: %s " \
+               % (obj.__class__, obj.Name, obj.Layers, obj.nL, obj.nN, obj.nI, obj.nO, obj.reachMethod, obj.reachOption, obj.relaxFactor,
+                  obj.numCores, obj.inputSet, obj.reachSet, obj.outputSet, obj.reachTime, obj.numReachSet, obj.numSamples, obj.unsafeRegion,
+                  obj.getCounterExs, obj.Operations, obj.dis_opt, obj.lp_solver)\
 
     # Evaluation of a FFNN
     def evaluate(obj, x):
@@ -121,7 +154,7 @@ class FFNNS:
         In = V
         for i in range(obj.nL):
             In = obj.Layers[i].sample(In)
-        return
+        return In
 
     # check if all activation functions are piece-wise linear
     def isPieceWiseNetwork(obj):
@@ -257,27 +290,35 @@ class FFNNS:
             obj.inputSet = a.getZono()
 
         if obj.numCores == 1:
-            obj.reachOption = np.array([]) # don't use parallel computing
+            #obj.reachOption = np.array([]) # don't use parallel computing
+            obj.reachOption = ''  # don't use parallel computing
         else:
             print('working on this......')
 
         obj.reachSet = np.array([1, obj.nL])
-        obj.numReachSet = np.zeros([1, obj.nL]);
+        obj.numReachSet = np.zeros([1, obj.nL])
         obj.reachTime = np.array([]);
 
         # compute reachable set
-        In = obj.inputSet
+        Input_list = []
+        Input_list.append(obj.inputSet)
+        #print(obj.Layers)
+        In = []
 
         for i in range (obj.nL):
             if obj.dis_opt == 'display':
                 print('\nComputing reach set for Layer %d ...' % i)
 
             st = tic()
-            In = obj.Layers[i].reach(In, obj.reachMethod, obj.reachOption, obj.relaxFactor, obj.dis_opt, obj.lp_solver)
-            t1 = toc(st)
+            #In = obj.Layers[i].reach(In, obj.reachMethod, obj.reachOption, obj.relaxFactor, obj.dis_opt, obj.lp_solver)
+            In = obj.Layers[i].reach(Input_list, obj.reachMethod, obj.reachOption, obj.relaxFactor, obj.dis_opt, obj.lp_solver)
+            t1 = toc()
 
-            obj.numReachSet[i] = len(In)
-            obj.reachTime = np.column_stack([obj.reachTime, t1])
+            obj.numReachSet[i] = len(In[0])
+            if obj.reachTime.size:
+                obj.reachTime = np.column_stack([obj.reachTime, t1])
+            else:
+                obj.reachTime = t1
 
             if obj.dis_opt == 'display':
                 print('\nExact computation time: %.5f seconds' % t1)
@@ -287,9 +328,10 @@ class FFNNS:
         obj.totalReachTime = np.sum(obj.reachTime)
         S = obj.outputSet
         t = obj.totalReachTime
+
         if obj.dis_opt == 'display':
             print('\nTotal reach set computation time: %.5f seconds' % obj.totalReachTime)
-            print('\nTotal number of output reach sets: %d', len(obj.outputSet))
+            print('\nTotal number of output reach sets: %d' % len(obj.outputSet))
 
         return [S, t]
 
@@ -808,7 +850,7 @@ class FFNNS:
 
         m = len(U)
         for i in range(m):
-            if not isinstance(U[i], 'HalfSpace'):
+            if not isinstance(U[i], HalfSpace):
                 ('error %d^th unsafe region is not a HalfSpace' % i)
 
         if n_samples < 1:
