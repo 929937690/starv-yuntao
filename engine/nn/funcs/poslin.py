@@ -9,6 +9,8 @@ from numba import njit, prange
 # the data. It takes an array in as an input and normalizes its values
 # between 00 and 11. It then returns an output array with the same
 # dimensions as the input.
+from engine.set.zono import Zono
+
 
 class PosLin:
     # PosLin class contains method for reachability analysis for Layer with
@@ -556,7 +558,7 @@ class PosLin:
                 m = len(listed_lu_map)
 
                 for i in range(m):
-                    print('\nPerforming approximate PosLin_%d operation using Star', lu_map[i])
+                    print('\nPerforming approximate PosLin_%d operation using Star' % lu_map[i])
                     In = PosLin.stepReachStarApprox(In, listed_lu_map[i])
 
                 S = In
@@ -751,6 +753,73 @@ class PosLin:
     #             S = PosLin.multipleStepReachStarApprox_at_one(In, map8, lb1, ub1) # one-shot approximation
     #             return S
 
+#--------------------------- over-approximate reachability analysis use zonotope
+    # step over-approximate reachability analysis using zonotope
+    def stepReachZonoApprox(I, index, lb, ub):
+        # @I: zonotope input set
+        # @lb: lower bound of input at specific neuron i
+        # @ub: lower bound of input at specfic neuron i
+        # @index: index of the neuron we want to perform stepReach
+        # @Z: zonotope output set
+        #
+        # reference: Fast and Effective Robustness Ceritification,
+        # Gagandeep Singh, NIPS 2018
+
+        assert isinstance(I, Zono), 'error: input set is not a Zonotope'
+
+        if lb >= 0:
+            Z = Zono(I.c, I.V)
+        elif ub <= 0:
+            c = copy.deepcopy(I.c)
+            c[index] = 0
+            V = copy.deepcopy(I.V)
+            #V[index, :] = 0
+            V[index, :] = np.zeros(1, I.V.shape[1])
+            Z = Zono(c, V)
+        elif lb < 0 and ub > 0:
+            lamda = ub/(ub - lb)
+            mu = -0.5 * ub * lb/(ub - lb)
+
+            c = copy.deepcopy(I.c)
+            c[index] = lamda * c[index] + mu
+            V = copy.deepcopy(I.V)
+            #V[index, :] = 0
+            V[index, :] = lamda * V[index, :]
+            I1 = np.zeros(I.dim, 1)
+            I1[index] = mu
+            V = np.column_stack([V, I1])
+            Z = Zono(c, V)
+
+        return Z
+
+    # over-approximate reachability analysis use zonotope
+    def reach_zono_approx(*args):
+        # @I: zonotope input
+        # @Z: zonotope output
+        #
+        # reference: Fast and Effective Robustness Ceritification,
+        # Gagandeep Singh, NIPS 2018
+
+        if len(args) == 1:
+            I = args[0]
+            dis_opt = ''
+        elif len(args) == 2:
+            I = args[0]
+            dis_opt = args[1]
+        else:
+            'error: Invalid number of input arguments, should be 1 or 2'
+
+        assert isinstance(I, Zono) , 'error: input set is not a Zonotope'
+        In = I
+        [lb, ub] = I.getBounds()
+        for i in range(I.dim):
+            if dis_opt == 'display':
+                print('\nPerforming approximate PosLin_%d operation using Zonotope' % i)
+            In = PosLin.stepReachZonoApprox(In, i, lb[i], ub[i])
+
+        Z = In
+
+        return Z
 
     # main function for reachability analysis
     def reach(*args):
@@ -808,4 +877,7 @@ class PosLin:
         elif method == 'approx-star': # over-approximate analysis using star
             #R = PosLin.reach_star_approx(I, option, dis_opt, lp_solver)
             R = PosLin.reach_star_approx(I)
+            return R
+        elif method == 'approx-zono': # over-approximate analysis using zonotope
+            R = PosLin.reach_zono_approx(I, dis_opt)
             return R
