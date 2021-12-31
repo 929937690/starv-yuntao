@@ -1,3 +1,5 @@
+#!/usr/bin/python3
+
 import numpy as np
 from engine.nn.layers.layer import Layers
 from engine.set.star import Star
