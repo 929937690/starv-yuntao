@@ -1,6 +1,7 @@
 #!/usr/bin/python3
 import numpy as np
 from engine.nn.funcs.poslin import PosLin
+from engine.nn.fnn.Operation import Operation
 
 # @: matrix multi for np array (change later)
 class Layers:
@@ -163,4 +164,27 @@ class Layers:
                 else: 'error: Unsupported activation function, currently support purelin, poslin(ReLU), satlin, satlins, logsig, tansig, softmax'
                 return S
 
-    # flattening a layer into a sequence of operation...
+    # flattening a layer into a sequence of operation
+    def flatten(obj, reachMethod):
+        # @reachMethod: reachability method
+        # @Ops: an array of operations for the reachability of
+        # the layer
+
+        Ops = []
+        O1 = Operation('AffineMap', obj.W, obj.b)
+
+        if obj.f == 'poslin':
+            if reachMethod == 'exact-star':
+                # O2[obj.N] = Operation
+                O2 = []
+                for i in range (obj.N):
+                    O2.append(Operation('PosLin_stepExactReach', i))
+            elif reachMethod == 'approx-star':
+                O2 = Operation('PosLin_approxReachStar')
+            elif reachMethod == 'approx-zono':
+                O2 = Operation('PosLin_approxReachZono')
+
+        Ops.append(O1)
+        Ops.append(O2)
+
+        return Ops
