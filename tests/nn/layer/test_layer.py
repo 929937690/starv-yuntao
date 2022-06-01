@@ -2,7 +2,7 @@
 import numpy as np
 
 from engine.nn.funcs.poslin import PosLin
-from engine.nn.layers.layer import Layers
+from engine.nn.layer.layer import Layer
 from engine.set.star import Star
 # random input set
 Ai = np.matrix('-0.540814703979925 -0.421878816995180;'
@@ -30,15 +30,15 @@ b = np.matrix('0.5;'
 V = np.matrix('0 0;'
               '1 0;'
               '0 1')
-L = Layers(W=W, b=b, f='poslin')
-#print(L.__repr__())
+L = Layer(W=W, b=b, f='poslin')
+print(L.__repr__())
 # ----------------- end the test for Layer Construction function ---------
 
 # ----------------- test for Layer reach function ---------
 # V, C, d
 I = Star(V.transpose(), Ai, bi)
 I1 = I.affineMap(W, b)
-#print(I1.__repr__())
+print(I1.__repr__())
 I_list = []
 I_list.append(I)
 S = PosLin.reach(I1)

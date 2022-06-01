@@ -4,7 +4,7 @@ from engine.nn.funcs.poslin import PosLin
 from engine.nn.fnn.Operation import Operation
 
 # @: matrix multi for np array (change later)
-class Layers:
+class Layer:
     # LAYERS is a class that contains only reachability analysis method using
     # stars, this gonna replace Layer class in the future, i.e., delete
     # polyhedron-base reachability analysis method

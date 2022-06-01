@@ -1,7 +1,7 @@
 import numpy as np
 
 from engine.nn.funcs.poslin import PosLin
-from engine.nn.layers.layer import Layers
+from engine.nn.Layer.layer import Layer
 from engine.set.star import Star
 from engine.nn.fnn.FFNNS import FFNNS
 from engine.set.halfspace import HalfSpace
@@ -12,13 +12,13 @@ W = np.matrix('1 1;'
               '0 1')
 b = np.matrix('0;'
               '0.5')
-L = Layers(W, b, 'poslin')
+L = Layer(W, b, 'poslin')
 #print(L.__repr__())
 
-Layers = []
-Layers.append(L)
-#print(Layers)
-F = FFNNS(Layers) # network
+Layer = []
+Layer.append(L)
+#print(Layer)
+F = FFNNS(Layer) # network
 #print(F.__repr__())
 
 input_vec = np.matrix('1; 1') # input vector for a single points

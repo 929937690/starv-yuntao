@@ -1,7 +1,7 @@
 #!/usr/bin/python3
 
 import numpy as np
-from engine.nn.layers.layer import Layers
+from engine.nn.layer.layer import Layer
 from engine.set.star import Star
 from engine.set.box import Box
 from engine.set.zono import Zono
@@ -41,9 +41,9 @@ class FFNNS:
     # date: 11/13/2021
 
     def __init__(obj,
-                 #Layers = np.matrix([]), # An array of Layers, eg, Layers = [L1 L2 ... Ln]
-                 Layers=[],  # An list of Layers, eg, Layers = [L1 L2 ... Ln]
-                 nL = 0, # number of Layers
+                 #Layer = np.matrix([]), # An array of Layer, eg, Layer = [L1 L2 ... Ln]
+                 Layer=[],  # An list of Layer, eg, Layer = [L1 L2 ... Ln]
+                 nL = 0, # number of Layer
                  nN = 0, # number of Neurons
                  nI = 0, # number of Inputs
                  nO = 0, # number of Outputs
@@ -56,10 +56,10 @@ class FFNNS:
                  relaxFactor = 0, # use only for approximate star method, 0 mean no relaxation
                  numCores = 1, # number of cores (workers) using in computation
                  inputSet = np.matrix([]), # input set
-                 reachSet = np.matrix([]), # reachable set of each layers
+                 reachSet = np.matrix([]), # reachable set of each Layer
                  outputSet = np.matrix([]), # output reach set
-                 reachTime = np.matrix([]), # computation time for each layers
-                 numReachSet = np.matrix([]), # number of reach sets over layers
+                 reachTime = np.matrix([]), # computation time for each Layer
+                 numReachSet = np.matrix([]), # number of reach sets over Layer
                  totalReachTime = 0, # total computation time
                  numSamples = 0, # default number of samples using to falsify a property
                  unsafeRegion = np.matrix([]), # unsafe region of the network
@@ -73,8 +73,8 @@ class FFNNS:
                  ):
 
         #assert isinstance(reachOption, np.ndarray), 'error: reachOption matrix is not an ndarray'
-        #assert isinstance(Layers, np.ndarray), 'error: Layers matrix is not an ndarray'
-        assert isinstance(Layers, list), 'error: Layers matrix is not a list'
+        #assert isinstance(Layer, np.ndarray), 'error: Layer matrix is not an ndarray'
+        assert isinstance(Layer, list), 'error: Layer matrix is not a list'
         assert isinstance(inputSet, np.ndarray), 'error: inputSet matrix is not an ndarray'
         assert isinstance(reachSet, np.ndarray), 'error: reachSet vector is not an ndarray'
         assert isinstance(outputSet, np.ndarray), ' error: outputSet is not an ndarray'
@@ -84,28 +84,28 @@ class FFNNS:
         assert isinstance(Operations, np.ndarray), 'error: Operations matrix is not an ndarray'
         #assert isinstance(dis_opt, np.ndarray), 'error: dis_opt matrix is not an ndarray'
 
-        if Layers:
+        if Layer:
             if Name:
                 obj.Name = Name
-            #nL = np.size(Layers, 1) # number of Layer
-            nl = len(Layers) # number of Layer
+            #nL = np.size(Layer, 1) # number of Layer
+            nl = len(Layer) # number of Layer
             for i in range(nL):
-                L = Layers[i]
-                if not isinstance(L, Layers): 'error: Element of Layers array is not a Layer object'
+                L = Layer[i]
+                if not isinstance(L, Layer): 'error: Element of Layer array is not a Layer object'
 
-            # check consistency between layers
+            # check consistency between Layer
             for i in range(nL-1):
-                if not np.size(Layers[i].W, 1) == np.size(Layers[i+1].W, 2):
+                if not np.size(Layer[i].W, 1) == np.size(Layer[i+1].W, 2):
                     'error: Inconsistent dimensions between Layer and Layer'
 
-            obj.Layers = Layers
-            obj.nL = nl # number of layers
-            obj.nI = Layers[0].W.shape[1] # number of inputs
-            obj.nO = Layers[nL].W.shape[0] # number of outputs
+            obj.Layer = Layer
+            obj.nL = nl # number of Layer
+            obj.nI = Layer[0].W.shape[1] # number of inputs
+            obj.nO = Layer[nL].W.shape[0] # number of outputs
 
             nN = 0
             for i in range(nL):
-                nN = nN + Layers[i].N
+                nN = nN + Layer[i].N
             obj.nN = nN # number of neurons
 
             obj.Name = Name
@@ -129,10 +129,10 @@ class FFNNS:
         raise Exception('error: failed to create FFNNS')
 
     def __repr__(obj):
-        return "class: %s \nName: %s \nLayers: %s \nnL: %s \nnN: %s \nnI: %s \nnO: %s \nreachMethod: %s \nreachOption: %s \nrelaxFactor: %s" \
+        return "class: %s \nName: %s \nLayer: %s \nnL: %s \nnN: %s \nnI: %s \nnO: %s \nreachMethod: %s \nreachOption: %s \nrelaxFactor: %s" \
                "\nnumCores: %s \ninputSet: %s \nreachSet: %s \noutputSet: %s \nreachTime: %s \nnumReachSet: %s \nnumSamples: %s " \
                "\nunsafeRegion: %s \ngetCounterExs: %s \nOperations: %s \ndis_opt: %s \nlp_solver: %s " \
-               % (obj.__class__, obj.Name, obj.Layers, obj.nL, obj.nN, obj.nI, obj.nO, obj.reachMethod, obj.reachOption, obj.relaxFactor,
+               % (obj.__class__, obj.Name, obj.Layer, obj.nL, obj.nN, obj.nI, obj.nO, obj.reachMethod, obj.reachOption, obj.relaxFactor,
                   obj.numCores, obj.inputSet, obj.reachSet, obj.outputSet, obj.reachTime, obj.numReachSet, obj.numSamples, obj.unsafeRegion,
                   obj.getCounterExs, obj.Operations, obj.dis_opt, obj.lp_solver)\
 
@@ -144,7 +144,7 @@ class FFNNS:
 
         y = x
         for i in range(obj.nL):
-            y = obj.Layers[i].evaluate(y)
+            y = obj.Layer[i].evaluate(y)
         return
 
     # Sample of FFNN
@@ -155,7 +155,7 @@ class FFNNS:
 
         In = V
         for i in range(obj.nL):
-            In = obj.Layers[i].sample(In)
+            In = obj.Layer[i].sample(In)
         return In
 
     # check if all activation functions are piece-wise linear
@@ -163,7 +163,7 @@ class FFNNS:
         n = obj.nL
         b = 1
         for i in range(obj.nL):
-            f = obj.Layers[i].f
+            f = obj.Layer[i].f
             if f != 'poslin' and f != 'purelin' and f != 'satlin' and f != 'satlins' and f != 'leakyrelu':
                 b = 0
                 return
@@ -173,7 +173,7 @@ class FFNNS:
         # @file_name: name of file you want to store all data information
         f = open(file_name, 'w')
         f.write('Feedforward Neural Network Information\n')
-        f.write('\nNumber of layers: %d' % obj.nL)
+        f.write('\nNumber of Layer: %d' % obj.nL)
         f.write('\nNumber of neurons: %d' % obj.nN)
         f.write('\nNumber of inputs: %d' % obj.nI)
         f.write('\nNumber of outputs: %d' % obj.nO)
@@ -195,7 +195,7 @@ class FFNNS:
     def printtoConsole(obj):
 
         print('Feedforward Neural Network Information\n')
-        print('\nNumber of layers: %d' % obj.nL)
+        print('\nNumber of Layer: %d' % obj.nL)
         print('\nNumber of neurons: %d' % obj.nN)
         print('\nNumber of inputs: %d' % obj.nI)
         print('\nNumber of outputs: %d' % obj.nO)
@@ -304,7 +304,7 @@ class FFNNS:
         # compute reachable set
         Input_list = []
         Input_list.append(obj.inputSet)
-        #print(obj.Layers)
+        #print(obj.Layer)
         In = []
 
         for i in range (obj.nL):
@@ -312,8 +312,8 @@ class FFNNS:
                 print('\nComputing reach set for Layer %d ...' % i)
 
             st = tic()
-            #In = obj.Layers[i].reach(In, obj.reachMethod, obj.reachOption, obj.relaxFactor, obj.dis_opt, obj.lp_solver)
-            In = obj.Layers[i].reach(Input_list, obj.reachMethod, obj.reachOption, obj.relaxFactor, obj.dis_opt, obj.lp_solver)
+            #In = obj.Layer[i].reach(In, obj.reachMethod, obj.reachOption, obj.relaxFactor, obj.dis_opt, obj.lp_solver)
+            In = obj.Layer[i].reach(Input_list, obj.reachMethod, obj.reachOption, obj.relaxFactor, obj.dis_opt, obj.lp_solver)
             t1 = toc()
 
             obj.numReachSet[i] = len(In[0])
@@ -1487,9 +1487,9 @@ class FFNNS:
 
     # random generate a network for testing
     def rand(neurons, funcs):
-        # neurons: an array of neurons of input layer - hidden layers-
-        # output layers
-        # funcs: an array of activation functions of hidden layers
+        # neurons: an array of neurons of input layer - hidden Layer-
+        # output Layer
+        # funcs: an array of activation functions of hidden Layer
 
         print('Working on this....')
 
@@ -1553,7 +1553,7 @@ class FFNNS:
     #
     #     # construct a subnetwork
     #     # need to fix
-    #     subnet = FFNNS(obj.Layers(layer_id + 1:obj.nL))
+    #     subnet = FFNNS(obj.Layer(layer_id + 1:obj.nL))
     #     N = subnet.nI
     #     lb = np.zeros(N, 1)
     #     influence = np.zeros(N, 1)

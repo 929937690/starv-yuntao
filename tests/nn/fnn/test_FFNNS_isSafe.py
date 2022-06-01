@@ -1,7 +1,7 @@
 import numpy as np
 
 from engine.nn.funcs.poslin import PosLin
-from engine.nn.layers.layer import Layers
+from engine.nn.layer.layer import Layer
 from engine.set.star import Star
 from engine.nn.fnn.FFNNS import FFNNS
 from engine.set.halfspace import HalfSpace
